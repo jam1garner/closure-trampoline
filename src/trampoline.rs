@@ -58,12 +58,7 @@ const NOP_COUNT: usize = jit::PAGE_SIZE - ((
 ) + SIZE_OF_TRAMPOLINE_END);
 
 pub extern "C" fn call(boxed_closure: &&&dyn Fn()) {
-    println!("Reached Rust portion of trampoline");
-    //println!("{:#X}", boxed_closure);
-    //todo!();
-    dbg!(boxed_closure as *const &&_);
     boxed_closure();
-    println!("test2");
 }
 
 fn generate_trampolines() -> impl Iterator<Item = u8> {
@@ -110,13 +105,6 @@ impl<'a> TrampolineSet {
         let index = index + 1;
 
         let offset = ((TRAMPOLINE_CAPACITY - index) * TRAMPOLINE_ENTRYPOINT.len()) + NOP_COUNT;
-
-        unsafe {
-            self.jit_mem.unlock();
-            dbg!(self.jit_mem.contents);
-            println!("{:02X?}", &self.jit_mem.code_as_slice()[offset..]);
-            self.jit_mem.lock();
-        }
 
         self.jit_mem.get_func_ptr(offset)
     }
